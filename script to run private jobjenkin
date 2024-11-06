@@ -1,0 +1,32 @@
+# script for private 
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                // Clone the repository using the Jenkins Git SCM step
+                git branch: 'main', credentialsId: 'git', url: 'https://github.com/sivaj07/Jenkintest.git'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                // Check where we are and list the files to debug (optional)
+                sh '''
+                    echo "Current directory: $(pwd)"
+                    echo "Listing files in the current directory:"
+                    ls -al
+                    
+                    # Build Docker image directly from the workspace (no need to cd into Jenkintest)
+                    docker build -t cloud:latest .
+                '''
+            }
+        }
+        stage('Run Docker Container') {
+            steps {
+                // Run the Docker container with the specified options
+                sh 'docker run -itd --name food -p 8081:80 cloud:latest'
+            }
+        }
+    }
+}
